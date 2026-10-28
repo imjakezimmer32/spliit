@@ -1,7 +1,10 @@
-import { ActivityType, Prisma } from '@/generated/prisma/client'
+import { ActivityType, Prisma, Receipt } from '@/generated/prisma/client'
 import { logActivity, randomId } from '@/lib/api'
+import { env } from '@/lib/env'
+import { getRuntimeFeatureFlags } from '@/lib/featureFlags'
 import { prisma } from '@/lib/prisma'
 import { isAllowedUploadUrl } from '@/lib/uploaded-image-url'
+import { getCurrencyFromGroup } from '@/lib/utils'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import {
@@ -13,6 +16,8 @@ import {
   ReceiptAllocation,
   revalidateItemClaims,
 } from './allocate'
+import { extractReceiptItems } from './ocr'
+import { mapExtractedReceipt } from './ocr-mapping'
 import {
   canManageReceipt,
   canRemoveClaim,
@@ -568,11 +573,121 @@ export async function createReceipt(
   return { receiptId }
 }
 
-/** Phase 4 replaces this with the real OCR extraction. */
+const MAX_SCANS = 3
+
+/** Checks that apply to a scan before and after locking (PLAN E.4). */
+function assertScannable(
+  receipt: Pick<Receipt, 'status' | 'imageUrl' | 'scanCount'>,
+): string {
+  if (receipt.status !== 'DRAFT') {
+    throw fail('CONFLICT', 'Only a draft receipt can be scanned.')
+  }
+  if (!receipt.imageUrl) {
+    throw fail('FORBIDDEN', 'The receipt has no image to scan.')
+  }
+  if (receipt.scanCount >= MAX_SCANS) {
+    throw fail('FORBIDDEN', 'The scan limit for this receipt is reached.')
+  }
+  return receipt.imageUrl
+}
+
+/**
+ * Reads the line items off the receipt image. The OCR call runs outside the
+ * transaction, so the row lock is not held while OpenAI responds. The state is
+ * checked again under the lock before anything is written.
+ */
 export async function scanReceipt(
-  _input: z.infer<typeof scanReceiptInput>,
-): Promise<never> {
-  throw fail('METHOD_NOT_SUPPORTED', 'Receipt scanning is not available yet.')
+  input: z.infer<typeof scanReceiptInput>,
+): Promise<{ itemCount: number; found: boolean }> {
+  // Enforce the flag server-side: the UI gate does not stop a direct call.
+  const { enableReceiptExtract } = await getRuntimeFeatureFlags()
+  if (!enableReceiptExtract) {
+    throw fail('FORBIDDEN', 'Receipt scanning is not enabled.')
+  }
+
+  // Cheap checks first, so a rejected call never reaches OpenAI.
+  const preview = await prisma.receipt.findUnique({
+    where: { id: input.receiptId },
+  })
+  if (!preview || preview.groupId !== input.groupId) {
+    throw fail('NOT_FOUND', 'Receipt not found.')
+  }
+  assertActor(await loadParticipants(prisma, input.groupId), input.actorId)
+  if (!canManageReceipt(preview, input.actorId)) {
+    throw fail('FORBIDDEN', 'Only the payer or the creator can do this.')
+  }
+  const imageUrl = assertScannable(preview)
+  // Only our own uploads may reach the model. Without this, an arbitrary URL
+  // is forwarded to OpenAI (SSRF-via-OpenAI and unbounded spend).
+  if (!isAllowedUploadUrl(imageUrl)) {
+    throw fail('BAD_REQUEST', 'The image URL is not an allowed upload URL.')
+  }
+
+  const group = await prisma.group.findUniqueOrThrow({
+    where: { id: input.groupId },
+    select: { currency: true, currencyCode: true },
+  })
+  const extracted = await extractReceiptItems(imageUrl)
+  const mapped = extracted
+    ? mapExtractedReceipt(extracted, getCurrencyFromGroup(group))
+    : null
+
+  return prisma.$transaction(async (tx) => {
+    await lockReceipt(tx, input.groupId, input.receiptId)
+    const state = await loadReceiptState(tx, input.receiptId)
+    assertActor(state.participants, input.actorId)
+    requireManager(state, input.actorId)
+    assertScannable(state.receipt)
+
+    // A failed read still counts as a scan, because the call was made.
+    if (!extracted || !mapped) {
+      await tx.receipt.update({
+        where: { id: input.receiptId },
+        data: { scanCount: { increment: 1 } },
+      })
+      return { itemCount: 0, found: false }
+    }
+
+    await tx.receiptItem.deleteMany({ where: { receiptId: input.receiptId } })
+    await tx.receiptAdjustment.deleteMany({
+      where: { receiptId: input.receiptId },
+    })
+    if (mapped.items.length > 0) {
+      await tx.receiptItem.createMany({
+        data: mapped.items.map((item, position) => ({
+          id: randomId(),
+          receiptId: input.receiptId,
+          position,
+          ...item,
+        })),
+      })
+    }
+    if (mapped.adjustments.length > 0) {
+      await tx.receiptAdjustment.createMany({
+        data: mapped.adjustments.map((adjustment, position) => ({
+          id: randomId(),
+          receiptId: input.receiptId,
+          position,
+          ...adjustment,
+        })),
+      })
+    }
+
+    await tx.receipt.update({
+      where: { id: input.receiptId },
+      data: {
+        scanCount: { increment: 1 },
+        printedTotal: mapped.printedTotal,
+        ocrRaw: extracted,
+        ocrModel: env.OPENAI_MODEL_RECEIPT_ITEMS,
+        title: mapped.title,
+        receiptDate: mapped.receiptDate
+          ? toReceiptDate(mapped.receiptDate)
+          : undefined,
+      },
+    })
+    return { itemCount: mapped.items.length, found: true }
+  })
 }
 
 export async function updateReceipt(
