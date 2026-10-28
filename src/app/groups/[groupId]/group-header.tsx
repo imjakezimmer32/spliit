@@ -6,7 +6,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import { useCurrentGroup } from './current-group-context'
 
-export const GroupHeader = () => {
+export const GroupHeader = ({
+  enableReceiptClaims = false,
+}: {
+  enableReceiptClaims?: boolean
+}) => {
   const { isLoading, groupId, group } = useCurrentGroup()
 
   return (
@@ -22,7 +26,10 @@ export const GroupHeader = () => {
       </h1>
 
       <div className="flex gap-2 justify-between">
-        <GroupTabs groupId={groupId} />
+        <GroupTabs
+          groupId={groupId}
+          enableReceiptClaims={enableReceiptClaims}
+        />
         {group && <ShareButton group={group} />}
       </div>
     </div>

@@ -11,8 +11,9 @@ import { SaveGroupLocally } from './save-recent-group'
 
 export function GroupLayoutClient({
   groupId,
+  enableReceiptClaims = false,
   children,
-}: PropsWithChildren<{ groupId: string }>) {
+}: PropsWithChildren<{ groupId: string; enableReceiptClaims?: boolean }>) {
   const { data, isLoading } = trpc.groups.get.useQuery({ groupId })
   const t = useTranslations('Groups.NotFound')
   const { toast } = useToast()
@@ -34,7 +35,7 @@ export function GroupLayoutClient({
   if (isLoading) {
     return (
       <CurrentGroupProvider {...props}>
-        <GroupHeader />
+        <GroupHeader enableReceiptClaims={enableReceiptClaims} />
         {children}
       </CurrentGroupProvider>
     )
@@ -42,7 +43,7 @@ export function GroupLayoutClient({
 
   return (
     <CurrentGroupProvider {...props}>
-      <GroupHeader />
+      <GroupHeader enableReceiptClaims={enableReceiptClaims} />
       <DeleteGroupNotice />
       {children}
       <SaveGroupLocally />

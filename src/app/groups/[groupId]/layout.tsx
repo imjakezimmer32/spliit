@@ -1,4 +1,5 @@
 import { cached } from '@/app/cached-functions'
+import { getRuntimeFeatureFlags } from '@/lib/featureFlags'
 import { Metadata } from 'next'
 import { PropsWithChildren } from 'react'
 import { GroupLayoutClient } from './layout.client'
@@ -26,5 +27,13 @@ export default async function GroupLayout({
   params,
 }: PropsWithChildren<Props>) {
   const { groupId } = await params
-  return <GroupLayoutClient groupId={groupId}>{children}</GroupLayoutClient>
+  const { enableReceiptClaims } = await getRuntimeFeatureFlags()
+  return (
+    <GroupLayoutClient
+      groupId={groupId}
+      enableReceiptClaims={enableReceiptClaims}
+    >
+      {children}
+    </GroupLayoutClient>
+  )
 }

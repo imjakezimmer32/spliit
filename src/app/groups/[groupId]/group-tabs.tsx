@@ -7,17 +7,20 @@ import {
   Info,
   Receipt,
   Scale,
+  ScanLine,
   Settings,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import { ComponentType } from 'react'
+import { PendingCountBadge } from './receipts/pending-count-badge'
 
 type Props = {
   groupId: string
+  enableReceiptClaims?: boolean
 }
 
-export function GroupTabs({ groupId }: Props) {
+export function GroupTabs({ groupId, enableReceiptClaims = false }: Props) {
   const t = useTranslations()
   const pathname = usePathname()
   const value =
@@ -26,6 +29,9 @@ export function GroupTabs({ groupId }: Props) {
 
   const tabs: { value: string; label: string; Icon: ComponentType<any> }[] = [
     { value: 'expenses', label: t('Expenses.title'), Icon: Receipt },
+    ...(enableReceiptClaims
+      ? [{ value: 'receipts', label: t('Receipts.title'), Icon: ScanLine }]
+      : []),
     { value: 'balances', label: t('Balances.title'), Icon: Scale },
     { value: 'information', label: t('Information.title'), Icon: Info },
     { value: 'stats', label: t('Stats.title'), Icon: BarChart3 },
@@ -52,6 +58,7 @@ export function GroupTabs({ groupId }: Props) {
           >
             <Icon className="w-4 h-4" />
             <span className="hidden sm:inline">{label}</span>
+            {value === 'receipts' && <PendingCountBadge groupId={groupId} />}
           </TabsTrigger>
         ))}
       </TabsList>
