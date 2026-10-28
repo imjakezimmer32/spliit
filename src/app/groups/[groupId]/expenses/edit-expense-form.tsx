@@ -1,7 +1,17 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { RuntimeFeatureFlags } from '@/lib/featureFlags'
 import { trpc } from '@/trpc/client'
+import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ExpenseForm } from './expense-form'
 
@@ -33,8 +43,29 @@ export function EditExpenseForm({
 
   const utils = trpc.useUtils()
   const router = useRouter()
+  const tManaged = useTranslations('Receipts.ManagedExpense')
 
   if (!group || !categories || !expense) return null
+
+  // Receipt-generated expenses are rewritten from their receipt, so they are
+  // edited there. The server refuses direct updates and deletes as well.
+  if (expense.receipt) {
+    return (
+      <Card className="m-4 sm:m-6">
+        <CardHeader>
+          <CardTitle>{tManaged('title')}</CardTitle>
+          <CardDescription>{tManaged('description')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild>
+            <Link href={`/groups/${groupId}/receipts/${expense.receipt.id}`}>
+              {tManaged('open')}
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <ExpenseForm

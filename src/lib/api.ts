@@ -118,6 +118,9 @@ export async function deleteExpense(
   participantId?: string,
 ) {
   const existingExpense = await getExpense(groupId, expenseId)
+  if (existingExpense?.receipt) {
+    throw new Error('This expense is managed by a receipt')
+  }
   await logActivity(groupId, ActivityType.DELETE_EXPENSE, {
     participantId,
     expenseId,
@@ -219,6 +222,9 @@ export async function updateExpense(
 
   const existingExpense = await getExpense(groupId, expenseId)
   if (!existingExpense) throw new Error(`Invalid expense ID: ${expenseId}`)
+  if (existingExpense.receipt) {
+    throw new Error('This expense is managed by a receipt')
+  }
 
   for (const participant of [
     expenseFormValues.paidBy,
@@ -365,7 +371,11 @@ export async function updateGroup(
 
   await logActivity(groupId, ActivityType.UPDATE_GROUP, { participantId })
 
-  return prisma.group.update({
+  const removedParticipants = existingGroup.participants.filter(
+    (p) => !groupFormValues.participants.some((p2) => p2.id === p.id),
+  )
+
+  const group = await prisma.group.update({
     where: { id: groupId },
     data: {
       name: groupFormValues.name,
@@ -373,9 +383,7 @@ export async function updateGroup(
       currency: groupFormValues.currency,
       currencyCode: groupFormValues.currencyCode,
       participants: {
-        deleteMany: existingGroup.participants.filter(
-          (p) => !groupFormValues.participants.some((p2) => p2.id === p.id),
-        ),
+        deleteMany: removedParticipants,
         updateMany: groupFormValues.participants
           .filter((participant) => participant.id !== undefined)
           .map((participant) => ({
@@ -395,6 +403,22 @@ export async function updateGroup(
       },
     },
   })
+
+  if (removedParticipants.length > 0) {
+    // Removing a participant cascades their claims, so the linked expenses of
+    // open receipts must be rewritten. Dynamic import: receipts/service.ts
+    // imports from this module, so a static import would be circular.
+    const { syncReceiptExpense } = await import('@/lib/receipts/service')
+    const openReceipts = await prisma.receipt.findMany({
+      where: { groupId, status: 'OPEN' },
+      select: { id: true },
+    })
+    for (const receipt of openReceipts) {
+      await prisma.$transaction((tx) => syncReceiptExpense(tx, receipt.id))
+    }
+  }
+
+  return group
 }
 
 export async function getGroup(groupId: string) {
@@ -434,6 +458,7 @@ export async function getGroupExpenses(
       splitMode: true,
       recurrenceRule: true,
       title: true,
+      receipt: { select: { id: true } },
       _count: { select: { documents: true } },
     },
     where: {
@@ -496,6 +521,7 @@ export async function getExpense(groupId: string, expenseId: string) {
       category: true,
       documents: true,
       recurringExpenseLink: true,
+      receipt: { select: { id: true, status: true } },
     },
   })
 }

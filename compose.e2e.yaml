@@ -23,6 +23,7 @@ services:
       POSTGRES_PRISMA_URL: postgresql://postgres:e2e@db:5432/spliit_e2e
       POSTGRES_URL_NON_POOLING: postgresql://postgres:e2e@db:5432/spliit_e2e
       NEXT_TELEMETRY_DISABLED: '1'
+      ENABLE_RECEIPT_CLAIMS: 'true'
     restart: 'no'
     depends_on:
       db:

@@ -127,6 +127,21 @@ const envSchema = z
       interpretBlankEnvVarAsUndefined,
       z.string().trim().default('gpt-5-nano'),
     ),
+    // Itemized receipts with claims and approvals. Manual entry needs nothing else;
+    // scanning also needs ENABLE_RECEIPT_EXTRACT (OpenAI + S3).
+    ENABLE_RECEIPT_CLAIMS: z.preprocess(
+      interpretEnvVarAsBool,
+      z.boolean().default(false),
+    ),
+    OPENAI_MODEL_RECEIPT_ITEMS: z.preprocess(
+      interpretBlankEnvVarAsUndefined,
+      z.string().trim().default('gpt-4.1-mini'),
+    ),
+    // Only sent when set; for reasoning models (gpt-5-*). Non-reasoning models reject it.
+    OPENAI_RECEIPT_ITEMS_REASONING_EFFORT: z.preprocess(
+      interpretBlankEnvVarAsUndefined,
+      z.enum(['none', 'minimal', 'low', 'medium', 'high']).optional(),
+    ),
     // Analytics is disabled unless a provider is selected. Several can be
     // listed, comma-separated, to report to all of them at once. These are read
     // on the server and passed to the client as props, so they are deliberately

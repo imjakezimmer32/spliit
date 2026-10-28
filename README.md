@@ -290,6 +290,16 @@ OPENAI_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 The model defaults to `gpt-5-nano` and can be changed with the optional `OPENAI_MODEL_RECEIPT_EXTRACT` variable — a larger model reads poor-quality photos more reliably, at a higher price per scan.
 
+### Itemized receipts with claims
+
+Receipts can be split line by line: each member claims the items they had, and the rest of the bill (tax, tip, fees, discounts) is shared in proportion. Manual entry needs nothing else:
+
+```.env
+ENABLE_RECEIPT_CLAIMS=true
+```
+
+Scanning a receipt into line items also needs the receipt scan above (`ENABLE_RECEIPT_EXTRACT`, `OPENAI_API_KEY` and expense documents). The model defaults to `gpt-4.1-mini` and can be changed with `OPENAI_MODEL_RECEIPT_ITEMS`. Only reasoning models (`gpt-5-*`) accept `OPENAI_RECEIPT_ITEMS_REASONING_EFFORT`; set it to `none`, `minimal`, `low`, `medium` or `high`, and leave it unset for other models.
+
 ### Deduce category from title
 
 You can offer users to automatically deduce the expense category from the title. Since this feature relies on a OpenAI subscription, follow the signup instructions above and configure the following environment variables:

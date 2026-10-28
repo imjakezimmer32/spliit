@@ -64,9 +64,18 @@ async function purgeGroup(groupId: string, now: Date) {
   // no longer be restored at this point (see restoreGroup), so this is final.
   // One DeleteObject per file rather than a DeleteObjects batch, which some
   // S3-compatible providers reject, but several at a time.
-  const keys = documents
-    .map(({ url }) => getUploadKeyFromUrl(url))
-    .filter((key) => key !== null)
+  // Receipt images also cover draft receipts, which have no expense yet.
+  const receipts = await prisma.receipt.findMany({
+    where: { groupId, imageUrl: { not: null } },
+    select: { imageUrl: true },
+  })
+  const keys = [
+    ...new Set(
+      [...documents.map(({ url }) => url), ...receipts.map((r) => r.imageUrl)]
+        .map((url) => (url ? getUploadKeyFromUrl(url) : null))
+        .filter((key) => key !== null),
+    ),
+  ]
   for (let i = 0; i < keys.length; i += S3_DELETE_CONCURRENCY) {
     await Promise.all(
       keys

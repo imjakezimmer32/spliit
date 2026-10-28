@@ -3,6 +3,7 @@
 import { ActiveUserModal } from '@/app/groups/[groupId]/expenses/active-user-modal'
 import { CreateFromReceiptButton } from '@/app/groups/[groupId]/expenses/create-from-receipt-button'
 import { ExpenseList } from '@/app/groups/[groupId]/expenses/expense-list'
+import { ReceiptsPendingBanner } from '@/app/groups/[groupId]/expenses/receipts-pending-banner'
 import ExportButton from '@/app/groups/[groupId]/export-button'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,8 +21,10 @@ import { useCurrentGroup } from '../current-group-context'
 
 export default function GroupExpensesPageClient({
   enableReceiptExtract,
+  enableReceiptClaims,
 }: {
   enableReceiptExtract: boolean
+  enableReceiptClaims: boolean
 }) {
   const t = useTranslations('Expenses')
   const { groupId } = useCurrentGroup()
@@ -29,6 +32,7 @@ export default function GroupExpensesPageClient({
   return (
     <>
       <TrackPage path={`/groups/${groupId}/expenses`} />
+      {enableReceiptClaims && <ReceiptsPendingBanner groupId={groupId} />}
       <Card className="mb-4 rounded-none -mx-4 border-x-0 sm:border-x sm:rounded-lg sm:mx-0">
         <div className="flex flex-1">
           <CardHeader className="flex-1 p-4 sm:p-6">

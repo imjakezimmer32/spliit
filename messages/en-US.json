@@ -345,6 +345,162 @@
       "retry": "Retry"
     }
   },
+  "Receipts": {
+    "title": "Receipts",
+    "description": "Scan a receipt and let everyone claim what they bought.",
+    "new": "New receipt",
+    "cancel": "Cancel",
+    "empty": "No receipts yet. Snap one to split it item by item.",
+    "PendingBanner": "{count, plural, one {You have # item to approve.} other {You have # items to approve.}}",
+    "Status": {
+      "DRAFT": "Draft",
+      "OPEN": "Claiming",
+      "FINALIZED": "Finalized"
+    },
+    "List": {
+      "open": "Being claimed",
+      "drafts": "Drafts",
+      "finalized": "Finalized",
+      "paidBy": "Paid by {payer} · {total}",
+      "unclaimed": "{amount} unclaimed",
+      "pending": "{count, plural, one {# approval pending} other {# approvals pending}}"
+    },
+    "Inbox": {
+      "title": "Waiting for your approval",
+      "empty": "Nothing to approve right now.",
+      "assigned": "<strong>{by}</strong> assigned you <em>{item}</em>",
+      "split": "<strong>{by}</strong> proposed splitting <em>{item}</em> {count} ways",
+      "fromReceipt": "From {receipt} · {date}",
+      "yourPart": "Your part: {amount}",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approveAll": "Approve all",
+      "declinedTitle": "Declined by others",
+      "declined": "<strong>{participant}</strong> declined <em>{item}</em>"
+    },
+    "ActiveParticipant": {
+      "title": "Who are you?",
+      "description": "Pick your name so we know who is claiming and approving items.",
+      "continue": "Continue",
+      "notYou": "Not {name}?",
+      "change": "Change"
+    },
+    "New": {
+      "payerTitle": "Who paid?",
+      "payerDescription": "Choose the housemate who paid this receipt.",
+      "next": "Next",
+      "back": "Back",
+      "captureTitle": "Add the receipt",
+      "titleLabel": "Title",
+      "dateLabel": "Date",
+      "defaultTitle": "Receipt",
+      "takePhoto": "Take or choose a photo",
+      "enterManually": "Enter items manually",
+      "uploading": "Uploading photo…",
+      "scanning": "Reading items…"
+    },
+    "Review": {
+      "title": "Check the items",
+      "description": "Fix anything the scan got wrong before everyone starts claiming.",
+      "readOnly": "{payer} is reviewing this receipt.",
+      "payerLabel": "Paid by",
+      "categoryLabel": "Category",
+      "itemName": "Item",
+      "quantity": "Qty",
+      "amount": "Amount",
+      "taxable": "Taxed",
+      "addItem": "Add item",
+      "removeItem": "Remove item",
+      "adjustments": "Tax, tip, fees and discounts",
+      "Kinds": {
+        "TAX": "Tax",
+        "TIP": "Tip",
+        "DISCOUNT": "Discount",
+        "FEE": "Fee"
+      },
+      "addAdjustment": "Add {kind}",
+      "itemsSubtotal": "Items subtotal",
+      "total": "Total",
+      "printedTotal": "Total on receipt",
+      "mismatch": "Items add up to {computed} but the receipt says {printed}. Check for missing or misread items.",
+      "noItems": "Add at least one item.",
+      "totalNotPositive": "The total must be more than zero.",
+      "rescan": "Scan again",
+      "save": "Save",
+      "startClaiming": "Start claiming",
+      "viewImage": "View receipt photo",
+      "receiptPhoto": "Receipt photo",
+      "doneEditing": "Back to claiming",
+      "invalidRow": "Each item needs a name and an amount. Each adjustment needs a label and an amount."
+    },
+    "Claim": {
+      "filterAll": "All",
+      "filterUnclaimed": "Unclaimed",
+      "filterMine": "Mine",
+      "unclaimed": "Unclaimed",
+      "itsMine": "It’s mine",
+      "removeMine": "Remove my claim",
+      "assignTo": "Assign to…",
+      "split": "Split…",
+      "splitRemaining": "Split remaining items among…",
+      "remove": "Remove",
+      "approve": "Approve",
+      "reject": "Reject",
+      "yourShare": "Your share: {amount}",
+      "waitingForYou": "{count, plural, one {# waiting for you} other {# waiting for you}}",
+      "editItems": "Edit items",
+      "pendingBy": "Waiting for {name}",
+      "approvedBy": "Approved by {name}",
+      "rejectedBy": "Declined by {name}",
+      "moreActions": "More actions",
+      "noMatches": "Nothing matches this filter."
+    },
+    "Split": {
+      "title": "Split {item}",
+      "description": "Choose who shares this item. Everyone except you has to approve.",
+      "shares": "Shares",
+      "save": "Propose split",
+      "min2": "Pick at least two people.",
+      "fewer": "Fewer shares",
+      "more": "More shares"
+    },
+    "Finalize": {
+      "button": "Finalize",
+      "title": "Finalize this receipt?",
+      "description": "Approved items are already in the balances. Finalizing locks the receipt.",
+      "unclaimedNote": "{amount} of unclaimed items will be counted as {payer}’s.",
+      "blockedPending": "{count, plural, one {# item is} other {# items are}} still waiting for approval.",
+      "confirm": "Finalize",
+      "reopen": "Reopen",
+      "finalizedOn": "Finalized on {date}"
+    },
+    "Summary": {
+      "title": "Who owes what",
+      "items": "Items",
+      "taxAndFees": "Tax, tip, fees & discounts",
+      "total": "Total",
+      "includesUnclaimed": "Includes {amount} unclaimed",
+      "pending": "{amount} pending approval",
+      "openExpense": "Open expense"
+    },
+    "DeletePopup": {
+      "label": "Delete",
+      "title": "Delete this receipt?",
+      "description": "Do you really want to delete this receipt? This action is irreversible.",
+      "yes": "Yes",
+      "cancel": "Cancel"
+    },
+    "ManagedExpense": {
+      "title": "Itemized receipt",
+      "description": "This expense is calculated from an itemized receipt. Edit the receipt instead.",
+      "open": "Open receipt"
+    },
+    "Errors": {
+      "generic": "Something went wrong. Please try again.",
+      "scanFailed": "We couldn’t read this receipt. Retry, or enter the items manually.",
+      "notAllowed": "You’re not allowed to do that."
+    }
+  },
   "Balances": {
     "title": "Balances",
     "description": "This is the amount that each participant paid or was paid for.",

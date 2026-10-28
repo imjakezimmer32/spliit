@@ -8,7 +8,7 @@ import { Locale } from '@/i18n/request'
 import { getGroupExpenses } from '@/lib/api'
 import { Currency, getCurrency } from '@/lib/currency'
 import { cn, formatCurrency, formatDateOnly } from '@/lib/utils'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, ScanLine } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -61,6 +61,7 @@ export function ExpenseCard({
 }: Props) {
   const router = useRouter()
   const locale = useLocale() as Locale
+  const tManaged = useTranslations('Receipts.ManagedExpense')
 
   const originalAmount =
     expense.originalAmount != null &&
@@ -93,6 +94,15 @@ export function ExpenseCard({
       <div className="flex-1">
         <div className={cn('mb-1', expense.isReimbursement && 'italic')}>
           {expense.title}
+          {expense.receipt && (
+            <ScanLine
+              data-testid="receipt-icon"
+              className="inline w-3.5 h-3.5 ml-1.5 align-[-2px] text-muted-foreground"
+              aria-label={tManaged('title')}
+            >
+              <title>{tManaged('title')}</title>
+            </ScanLine>
+          )}
         </div>
         <div className="text-xs text-muted-foreground">
           <Participants expense={expense} participantCount={participantCount} />

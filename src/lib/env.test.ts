@@ -82,3 +82,34 @@ describe('ENABLE_GROUP_DELETION', () => {
     ).toBe(true)
   })
 })
+
+describe('ENABLE_RECEIPT_CLAIMS', () => {
+  it('is disabled by default', () => {
+    expect(loadEnv({ ENABLE_RECEIPT_CLAIMS: '' }).ENABLE_RECEIPT_CLAIMS).toBe(
+      false,
+    )
+  })
+
+  it('is enabled by "true"', () => {
+    expect(
+      loadEnv({ ENABLE_RECEIPT_CLAIMS: 'true' }).ENABLE_RECEIPT_CLAIMS,
+    ).toBe(true)
+  })
+
+  it('defaults OPENAI_MODEL_RECEIPT_ITEMS to gpt-4.1-mini', () => {
+    expect(loadEnv({}).OPENAI_MODEL_RECEIPT_ITEMS).toBe('gpt-4.1-mini')
+    expect(
+      loadEnv({ OPENAI_MODEL_RECEIPT_ITEMS: '  ' }).OPENAI_MODEL_RECEIPT_ITEMS,
+    ).toBe('gpt-4.1-mini')
+  })
+
+  it('rejects an unknown reasoning effort', () => {
+    expect(() =>
+      loadEnv({ OPENAI_RECEIPT_ITEMS_REASONING_EFFORT: 'extreme' }),
+    ).toThrow()
+    expect(
+      loadEnv({ OPENAI_RECEIPT_ITEMS_REASONING_EFFORT: 'low' })
+        .OPENAI_RECEIPT_ITEMS_REASONING_EFFORT,
+    ).toBe('low')
+  })
+})
