@@ -157,3 +157,20 @@ export function distributeAmount(amount: number, count: number): number[] {
     0,
   )
 }
+
+/**
+ * Splits `amount` (in minor units) by integer `weights`, adding up to exactly
+ * `amount`. Largest remainder; ties go to the lowest index, so the caller
+ * decides the order. All zeros when the weights sum to 0.
+ */
+export function apportionByWeights(
+  amount: number,
+  weights: number[],
+): number[] {
+  return apportion(
+    amount,
+    weights,
+    weights.reduce((sum, weight) => sum + weight, 0),
+    0,
+  )
+}
