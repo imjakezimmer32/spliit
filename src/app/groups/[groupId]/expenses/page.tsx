@@ -1,5 +1,6 @@
 import GroupExpensesPageClient from '@/app/groups/[groupId]/expenses/page.client'
 import { env } from '@/lib/env'
+import { getRuntimeFeatureFlags } from '@/lib/featureFlags'
 import { getTranslations } from 'next-intl/server'
 
 // Render at request time rather than caching for an hour, so the flag below
@@ -15,11 +16,13 @@ export async function generateMetadata() {
 }
 
 export default async function GroupExpensesPage() {
+  const { enableReceiptClaims } = await getRuntimeFeatureFlags()
   return (
     <GroupExpensesPageClient
       enableReceiptExtract={
         env.ENABLE_RECEIPT_EXTRACT || env.NEXT_PUBLIC_ENABLE_RECEIPT_EXTRACT
       }
+      enableReceiptClaims={enableReceiptClaims}
     />
   )
 }

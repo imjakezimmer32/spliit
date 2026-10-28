@@ -15,11 +15,13 @@ import {
 export function DeletePopup({
   onDelete,
   className,
+  namespace = 'ExpenseForm.DeletePopup',
 }: {
   onDelete: () => Promise<void>
   className?: string
+  namespace?: 'ExpenseForm.DeletePopup' | 'Receipts.DeletePopup'
 }) {
-  const t = useTranslations('ExpenseForm.DeletePopup')
+  const t = useTranslations(namespace)
   return (
     <Dialog>
       <DialogTrigger asChild>

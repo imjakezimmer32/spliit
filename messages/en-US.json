@@ -349,6 +349,7 @@
     "title": "Receipts",
     "description": "Scan a receipt and let everyone claim what they bought.",
     "new": "New receipt",
+    "cancel": "Cancel",
     "empty": "No receipts yet. Snap one to split it item by item.",
     "PendingBanner": "{count, plural, one {You have # item to approve.} other {You have # items to approve.}}",
     "Status": {
@@ -426,7 +427,11 @@
       "totalNotPositive": "The total must be more than zero.",
       "rescan": "Scan again",
       "save": "Save",
-      "startClaiming": "Start claiming"
+      "startClaiming": "Start claiming",
+      "viewImage": "View receipt photo",
+      "receiptPhoto": "Receipt photo",
+      "doneEditing": "Back to claiming",
+      "invalidRow": "Each item needs a name and an amount. Each adjustment needs a label and an amount."
     },
     "Claim": {
       "filterAll": "All",
@@ -446,14 +451,18 @@
       "editItems": "Edit items",
       "pendingBy": "Waiting for {name}",
       "approvedBy": "Approved by {name}",
-      "rejectedBy": "Declined by {name}"
+      "rejectedBy": "Declined by {name}",
+      "moreActions": "More actions",
+      "noMatches": "Nothing matches this filter."
     },
     "Split": {
       "title": "Split {item}",
       "description": "Choose who shares this item. Everyone except you has to approve.",
       "shares": "Shares",
       "save": "Propose split",
-      "min2": "Pick at least two people."
+      "min2": "Pick at least two people.",
+      "fewer": "Fewer shares",
+      "more": "More shares"
     },
     "Finalize": {
       "button": "Finalize",
@@ -471,7 +480,15 @@
       "taxAndFees": "Tax, tip, fees & discounts",
       "total": "Total",
       "includesUnclaimed": "Includes {amount} unclaimed",
-      "pending": "{amount} pending approval"
+      "pending": "{amount} pending approval",
+      "openExpense": "Open expense"
+    },
+    "DeletePopup": {
+      "label": "Delete",
+      "title": "Delete this receipt?",
+      "description": "Do you really want to delete this receipt? This action is irreversible.",
+      "yes": "Yes",
+      "cancel": "Cancel"
     },
     "ManagedExpense": {
       "title": "Itemized receipt",

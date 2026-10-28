@@ -10,8 +10,15 @@ export default async function ReceiptPage({
   params: Promise<{ groupId: string; receiptId: string }>
 }) {
   const { groupId, receiptId } = await params
-  const { enableReceiptClaims } = await getRuntimeFeatureFlags()
+  const { enableReceiptClaims, enableReceiptExtract } =
+    await getRuntimeFeatureFlags()
   if (!enableReceiptClaims) notFound()
 
-  return <ReceiptPageClient groupId={groupId} receiptId={receiptId} />
+  return (
+    <ReceiptPageClient
+      groupId={groupId}
+      receiptId={receiptId}
+      enableReceiptExtract={enableReceiptExtract}
+    />
+  )
 }
