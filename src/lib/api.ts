@@ -118,6 +118,9 @@ export async function deleteExpense(
   participantId?: string,
 ) {
   const existingExpense = await getExpense(groupId, expenseId)
+  if (existingExpense?.receipt) {
+    throw new Error('This expense is managed by a receipt')
+  }
   await logActivity(groupId, ActivityType.DELETE_EXPENSE, {
     participantId,
     expenseId,
@@ -219,6 +222,9 @@ export async function updateExpense(
 
   const existingExpense = await getExpense(groupId, expenseId)
   if (!existingExpense) throw new Error(`Invalid expense ID: ${expenseId}`)
+  if (existingExpense.receipt) {
+    throw new Error('This expense is managed by a receipt')
+  }
 
   for (const participant of [
     expenseFormValues.paidBy,
@@ -434,6 +440,7 @@ export async function getGroupExpenses(
       splitMode: true,
       recurrenceRule: true,
       title: true,
+      receipt: { select: { id: true } },
       _count: { select: { documents: true } },
     },
     where: {
@@ -496,6 +503,7 @@ export async function getExpense(groupId: string, expenseId: string) {
       category: true,
       documents: true,
       recurringExpenseLink: true,
+      receipt: { select: { id: true, status: true } },
     },
   })
 }
