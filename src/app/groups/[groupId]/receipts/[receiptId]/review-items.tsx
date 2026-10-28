@@ -280,14 +280,19 @@ export function ReviewItems({
             <Controller
               control={form.control}
               name="categoryId"
-              render={({ field }) => (
-                <CategorySelector
-                  categories={categoriesData?.categories ?? []}
-                  defaultValue={field.value}
-                  onValueChange={field.onChange}
-                  isLoading={!categoriesData}
-                />
-              )}
+              render={({ field }) =>
+                // CategorySelector cannot render an empty list, so wait for it.
+                categoriesData ? (
+                  <CategorySelector
+                    categories={categoriesData.categories}
+                    defaultValue={field.value}
+                    onValueChange={field.onChange}
+                    isLoading={false}
+                  />
+                ) : (
+                  <></>
+                )
+              }
             />
           </div>
         </div>

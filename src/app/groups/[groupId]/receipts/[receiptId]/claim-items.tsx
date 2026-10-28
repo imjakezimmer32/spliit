@@ -194,25 +194,25 @@ export function ClaimItems({
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {item.claims.length === 0 ? (
+                {/* A rejected claim no longer counts, so the item is unclaimed. */}
+                {item.claims.every((claim) => claim.status === 'REJECTED') && (
                   <span className="text-xs text-muted-foreground">
                     {t('Claim.unclaimed')}
                   </span>
-                ) : (
-                  item.claims.map((claim) => (
-                    <ClaimChip
-                      key={claim.id}
-                      claim={claim}
-                      name={nameOf(claim.participantId)}
-                      pendingLabel={t('Claim.pendingBy', {
-                        name: nameOf(claim.participantId),
-                      })}
-                      rejectedLabel={t('Claim.rejectedBy', {
-                        name: nameOf(claim.participantId),
-                      })}
-                    />
-                  ))
                 )}
+                {item.claims.map((claim) => (
+                  <ClaimChip
+                    key={claim.id}
+                    claim={claim}
+                    name={nameOf(claim.participantId)}
+                    pendingLabel={t('Claim.pendingBy', {
+                      name: nameOf(claim.participantId),
+                    })}
+                    rejectedLabel={t('Claim.rejectedBy', {
+                      name: nameOf(claim.participantId),
+                    })}
+                  />
+                ))}
               </div>
             </button>
           </li>

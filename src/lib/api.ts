@@ -371,7 +371,11 @@ export async function updateGroup(
 
   await logActivity(groupId, ActivityType.UPDATE_GROUP, { participantId })
 
-  return prisma.group.update({
+  const removedParticipants = existingGroup.participants.filter(
+    (p) => !groupFormValues.participants.some((p2) => p2.id === p.id),
+  )
+
+  const group = await prisma.group.update({
     where: { id: groupId },
     data: {
       name: groupFormValues.name,
@@ -379,9 +383,7 @@ export async function updateGroup(
       currency: groupFormValues.currency,
       currencyCode: groupFormValues.currencyCode,
       participants: {
-        deleteMany: existingGroup.participants.filter(
-          (p) => !groupFormValues.participants.some((p2) => p2.id === p.id),
-        ),
+        deleteMany: removedParticipants,
         updateMany: groupFormValues.participants
           .filter((participant) => participant.id !== undefined)
           .map((participant) => ({
@@ -401,6 +403,22 @@ export async function updateGroup(
       },
     },
   })
+
+  if (removedParticipants.length > 0) {
+    // Removing a participant cascades their claims, so the linked expenses of
+    // open receipts must be rewritten. Dynamic import: receipts/service.ts
+    // imports from this module, so a static import would be circular.
+    const { syncReceiptExpense } = await import('@/lib/receipts/service')
+    const openReceipts = await prisma.receipt.findMany({
+      where: { groupId, status: 'OPEN' },
+      select: { id: true },
+    })
+    for (const receipt of openReceipts) {
+      await prisma.$transaction((tx) => syncReceiptExpense(tx, receipt.id))
+    }
+  }
+
+  return group
 }
 
 export async function getGroup(groupId: string) {
