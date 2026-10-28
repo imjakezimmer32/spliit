@@ -26,6 +26,8 @@ export async function getRuntimeFeatureFlags() {
       env.NEXT_PUBLIC_ENABLE_CATEGORY_EXTRACT,
     // No NEXT_PUBLIC_* counterpart: this one was never build-time.
     enableGroupDeletion: parseFlag(process.env.ENABLE_GROUP_DELETION),
+    // No NEXT_PUBLIC_* counterpart, like enableGroupDeletion.
+    enableReceiptClaims: parseFlag(process.env.ENABLE_RECEIPT_CLAIMS),
   }
 }
 

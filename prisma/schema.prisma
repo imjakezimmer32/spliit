@@ -22,6 +22,7 @@ model Group {
   participants Participant[]
   expenses     Expense[]
   activities   Activity[]
+  receipts     Receipt[]
   createdAt    DateTime      @default(now())
   deleteAt     DateTime?
 }
@@ -33,6 +34,10 @@ model Participant {
   groupId         String
   expensesPaidBy  Expense[]
   expensesPaidFor ExpensePaidFor[]
+  receiptsPaid       Receipt[]   @relation("ReceiptPaidBy")
+  receiptsCreated    Receipt[]   @relation("ReceiptCreatedBy")
+  itemClaims         ItemClaim[] @relation("ItemClaimParticipant")
+  itemClaimsAssigned ItemClaim[] @relation("ItemClaimAssignedBy")
 }
 
 model Category {
@@ -66,6 +71,111 @@ model Expense {
   recurrenceRule         RecurrenceRule?       @default(NONE)
   recurringExpenseLink   RecurringExpenseLink?
   recurringExpenseLinkId String?
+  receipt                Receipt?
+}
+
+enum ReceiptStatus {
+  DRAFT     // items being reviewed/edited, no Expense yet
+  OPEN      // claiming in progress; the generated Expense exists and is kept in sync
+  FINALIZED // locked; Expense frozen
+}
+
+enum ItemClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ReceiptAdjustmentKind {
+  TAX
+  TIP
+  DISCOUNT
+  FEE
+}
+
+model Receipt {
+  id           String              @id
+  group        Group               @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId      String
+  title        String
+  receiptDate  DateTime            @default(dbgenerated("CURRENT_DATE")) @db.Date
+  // Copied into the generated Expense. No relation on purpose (keeps Category untouched).
+  categoryId   Int                 @default(0)
+  paidBy       Participant         @relation("ReceiptPaidBy", fields: [paidById], references: [id], onDelete: Cascade)
+  paidById     String
+  createdBy    Participant?        @relation("ReceiptCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdById  String?
+  status       ReceiptStatus       @default(DRAFT)
+  imageUrl     String?
+  imageWidth   Int?
+  imageHeight  Int?
+  // Total printed on the receipt (minor units), from OCR or typed. Only used for a mismatch warning.
+  printedTotal Int?
+  scanCount    Int                 @default(0)
+  ocrModel     String?
+  ocrRaw       Json?
+  expense      Expense?            @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  expenseId    String?             @unique
+  items        ReceiptItem[]
+  adjustments  ReceiptAdjustment[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  finalizedAt  DateTime?
+
+  @@index([groupId, status])
+}
+
+model ReceiptItem {
+  id        String      @id
+  receipt   Receipt     @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  receiptId String
+  position  Int
+  name      String
+  quantity  Int         @default(1) // display only; splitting uses ItemClaim.shares
+  amount    Int         // NET line total in minor units (after line-level coupons), >= 0
+  taxable   Boolean     @default(true)
+  claims    ItemClaim[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([receiptId, position])
+}
+
+model ReceiptAdjustment {
+  id        String                @id
+  receipt   Receipt               @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  receiptId String
+  position  Int
+  kind      ReceiptAdjustmentKind
+  label     String
+  // Signed minor units: TAX/TIP/FEE > 0, DISCOUNT < 0.
+  amount    Int
+
+  @@index([receiptId])
+}
+
+model ItemClaim {
+  id             String          @id
+  // Denormalized for the approval inbox query (same idea as RecurringExpenseLink.groupId).
+  groupId        String
+  item           ReceiptItem     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId         String
+  participant    Participant     @relation("ItemClaimParticipant", fields: [participantId], references: [id], onDelete: Cascade)
+  participantId  String
+  // Who created the claim. Equal to participantId for a self-claim. Null if that participant was deleted.
+  assignedBy     Participant?    @relation("ItemClaimAssignedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+  assignedById   String?
+  // Integer weight within the item (1 = equal split). 1..100.
+  shares         Int             @default(1)
+  status         ItemClaimStatus @default(PENDING)
+  // Item portion (minor units, before tax/fees) this participant last agreed to. Null until approved.
+  approvedAmount Int?
+  respondedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([itemId, participantId])
+  @@index([groupId, participantId, status])
 }
 
 model ExpenseDocument {
