@@ -4,6 +4,7 @@ import { getCategories } from '@/lib/api'
 import { env } from '@/lib/env'
 import { getRuntimeFeatureFlags } from '@/lib/featureFlags'
 import { getOpenAIClient } from '@/lib/openai'
+import { toModelImageUrl } from '@/lib/r2-storage'
 import { isAllowedUploadUrl } from '@/lib/uploaded-image-url'
 import { formatCategoryForAIPrompt } from '@/lib/utils'
 import { z } from 'zod'
@@ -35,6 +36,7 @@ export async function extractExpenseInformationFromImage(imageUrl: string) {
     throw new Error('Invalid image URL.')
   }
 
+  const modelImageUrl = await toModelImageUrl(imageUrl)
   const categories = await getCategories()
   const openai = getOpenAIClient()
 
@@ -77,7 +79,7 @@ export async function extractExpenseInformationFromImage(imageUrl: string) {
       },
       {
         role: 'user',
-        content: [{ type: 'image_url', image_url: { url: imageUrl } }],
+        content: [{ type: 'image_url', image_url: { url: modelImageUrl } }],
       },
     ],
   })

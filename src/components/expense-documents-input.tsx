@@ -19,10 +19,11 @@ import { ToastAction } from '@/components/ui/toast'
 import { useToast } from '@/components/ui/use-toast'
 import { randomId } from '@/lib/random'
 import { ExpenseFormValues } from '@/lib/schemas'
+import { useUpload } from '@/lib/use-upload'
 import { formatFileSize } from '@/lib/utils'
 import { Loader2, Plus, Trash, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { getImageData, usePresignedUpload } from 'next-s3-upload'
+import { getImageData } from 'next-s3-upload'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -43,7 +44,7 @@ export function ExpenseDocumentsInput({
   const locale = useLocale()
   const t = useTranslations('ExpenseDocumentsInput')
   const [pending, setPending] = useState(false)
-  const { FileInput, openFileDialog, uploadToS3 } = usePresignedUpload() // use presigned uploads to addtionally support providers other than AWS
+  const { FileInput, openFileDialog, uploadToS3 } = useUpload() // use presigned uploads to addtionally support providers other than AWS
   const { toast } = useToast()
 
   const handleFileChange = async (file: File) => {

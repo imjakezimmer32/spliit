@@ -15,10 +15,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useToast } from '@/components/ui/use-toast'
 import { downscaleImage } from '@/lib/receipts/downscale-image'
 import { useReceiptHelpers } from '@/lib/receipts/use-receipt-helpers'
+import { useUpload } from '@/lib/use-upload'
 import { trpc } from '@/trpc/client'
 import { ArrowLeft, Camera, Loader2, PencilLine } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { getImageData, usePresignedUpload } from 'next-s3-upload'
+import { getImageData } from 'next-s3-upload'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useCurrentGroup } from '../../current-group-context'
@@ -67,7 +68,7 @@ function NewReceiptSteps({
   const router = useRouter()
   const { toast } = useToast()
   const { invalidate, showError } = useReceiptHelpers()
-  const { FileInput, openFileDialog, uploadToS3 } = usePresignedUpload()
+  const { FileInput, openFileDialog, uploadToS3 } = useUpload()
   const create = trpc.groups.receipts.create.useMutation()
   const scan = trpc.groups.receipts.scan.useMutation()
 

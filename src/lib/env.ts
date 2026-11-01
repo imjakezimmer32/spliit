@@ -77,6 +77,12 @@ const envSchema = z
     S3_UPLOAD_BUCKET: z.string().optional(),
     S3_UPLOAD_REGION: z.string().optional(),
     S3_UPLOAD_ENDPOINT: z.string().optional(),
+    // Where uploaded images live: `s3` (default; the S3_* settings) or `r2`, a
+    // Cloudflare R2 bucket bound to the worker as UPLOADS (Workers deploys).
+    UPLOAD_STORAGE: z.preprocess(
+      interpretBlankEnvVarAsUndefined,
+      z.enum(['s3', 'r2']).default('s3'),
+    ),
     // Lets users delete a group, after a grace period. Requires CRON_SECRET, as
     // groups are only purged by a scheduled call to /api/cron.
     ENABLE_GROUP_DELETION: z.preprocess(
@@ -195,6 +201,7 @@ const envSchema = z
       env.ENABLE_CATEGORY_EXTRACT || env.NEXT_PUBLIC_ENABLE_CATEGORY_EXTRACT
     if (
       enableExpenseDocuments &&
+      env.UPLOAD_STORAGE === 's3' &&
       // S3_UPLOAD_ENDPOINT is fully optional as it will only be used for providers other than AWS
       (!env.S3_UPLOAD_BUCKET ||
         !env.S3_UPLOAD_KEY ||

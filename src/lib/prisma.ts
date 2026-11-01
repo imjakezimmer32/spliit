@@ -3,16 +3,22 @@ import {
   PERF_INSTRUMENTATION_ENABLED,
   recordQuery,
 } from '@/lib/perf-instrumentation'
+import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaPg } from '@prisma/adapter-pg'
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 
 // Prisma 7 ships a Rust-free client and requires an explicit driver adapter.
 // We use the `pg` adapter with the pooled connection string.
+// On Cloudflare Workers (PRISMA_ADAPTER=neon) the Neon serverless driver is
+// used instead: it speaks WebSockets, which also works where raw TCP to
+// Postgres is unavailable.
 function createPrismaClient() {
-  const adapter = new PrismaPg({
-    connectionString: process.env['POSTGRES_PRISMA_URL'],
-  })
+  const connectionString = process.env['POSTGRES_PRISMA_URL']
+  const adapter =
+    process.env['PRISMA_ADAPTER'] === 'neon'
+      ? new PrismaNeon({ connectionString })
+      : new PrismaPg({ connectionString })
   const client = new PrismaClient({
     adapter,
     // log: [{ emit: 'stdout', level: 'query' }],
@@ -41,17 +47,38 @@ function createPrismaClient() {
   }) as unknown as PrismaClient
 }
 
-export let p: PrismaClient = undefined as any as PrismaClient
+// Workers forbid reusing an I/O object (such as a database socket) across
+// requests, so there one client is created per request, keyed by the
+// per-request context object that @opennextjs/cloudflare exposes. Everywhere
+// else (Node.js) a single client is shared, as before.
+const CLOUDFLARE_CONTEXT = Symbol.for('__cloudflare-context__')
+const perRequestClients = new WeakMap<object, PrismaClient>()
 
-if (typeof window === 'undefined') {
-  if (process.env['NODE_ENV'] === 'production') {
-    p = createPrismaClient()
-  } else {
-    if (!globalForPrisma.prisma) {
-      globalForPrisma.prisma = createPrismaClient()
+function getClient(): PrismaClient {
+  const ctx = (globalThis as Record<symbol, object | undefined>)[
+    CLOUDFLARE_CONTEXT
+  ]
+  if (ctx) {
+    let client = perRequestClients.get(ctx)
+    if (!client) {
+      client = createPrismaClient()
+      perRequestClients.set(ctx, client)
     }
-    p = globalForPrisma.prisma
+    return client
   }
+  globalForPrisma.prisma ??= createPrismaClient()
+  return globalForPrisma.prisma
 }
+
+export const p: PrismaClient =
+  typeof window === 'undefined'
+    ? new Proxy({} as PrismaClient, {
+        get(_target, prop) {
+          const client = getClient()
+          const value = Reflect.get(client, prop, client)
+          return typeof value === 'function' ? value.bind(client) : value
+        },
+      })
+    : (undefined as any as PrismaClient)
 
 export const prisma = p

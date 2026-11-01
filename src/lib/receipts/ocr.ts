@@ -1,5 +1,6 @@
 import { env } from '@/lib/env'
 import { getOpenAIClient } from '@/lib/openai'
+import { toModelImageUrl } from '@/lib/r2-storage'
 import { z } from 'zod'
 
 // Strict mode: the model must return exactly this shape. The zod mirror below
@@ -108,6 +109,7 @@ export async function extractReceiptItems(
   imageUrl: string,
 ): Promise<ExtractedReceipt | null> {
   try {
+    const modelImageUrl = await toModelImageUrl(imageUrl)
     const completion = await getOpenAIClient().chat.completions.create({
       model: env.OPENAI_MODEL_RECEIPT_ITEMS,
       response_format: {
@@ -129,7 +131,7 @@ export async function extractReceiptItems(
           content: [
             {
               type: 'image_url',
-              image_url: { url: imageUrl, detail: 'high' },
+              image_url: { url: modelImageUrl, detail: 'high' },
             },
           ],
         },

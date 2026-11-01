@@ -1,4 +1,5 @@
-import { env } from './env'
+import { effectiveBaseUrl, env } from './env'
+import { getR2KeyFromUrl } from './r2-storage'
 
 /**
  * Hosts that uploaded receipt/document images can legitimately live on, derived
@@ -37,6 +38,17 @@ export function isAllowedUploadUrl(rawUrl: string): boolean {
     return false
   }
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return false
+  if (env.UPLOAD_STORAGE === 'r2') {
+    // Images stored in R2 are served by this app under /api/files/.
+    try {
+      return (
+        url.host === new URL(effectiveBaseUrl).host &&
+        getR2KeyFromUrl(rawUrl) !== null
+      )
+    } catch {
+      return false
+    }
+  }
   return getAllowedUploadHosts().includes(url.hostname)
 }
 

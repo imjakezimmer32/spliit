@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // "Rent Split" — this fork deployed to Cloudflare Workers via @opennextjs/cloudflare.
+  // Secrets (POSTGRES_PRISMA_URL, POSTGRES_URL_NON_POOLING, OPENAI_API_KEY) are set
+  // with `wrangler secret put`, never committed.
+  "name": "rent-split",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "r2_buckets": [{ "binding": "UPLOADS", "bucket_name": "rent-split-uploads" }],
+  "vars": {
+    "BASE_URL": "https://rent-split.jake-35b.workers.dev",
+    "PRISMA_ADAPTER": "neon",
+    "UPLOAD_STORAGE": "r2",
+    "ENABLE_EXPENSE_DOCUMENTS": "true",
+    "ENABLE_RECEIPT_EXTRACT": "true",
+    "ENABLE_RECEIPT_CLAIMS": "true",
+    "ENABLE_CATEGORY_EXTRACT": "false",
+    "OPENAI_MODEL_RECEIPT_ITEMS": "gpt-4.1-mini",
+    "OPENAI_MODEL_RECEIPT_EXTRACT": "gpt-4.1-mini"
+  }
+}

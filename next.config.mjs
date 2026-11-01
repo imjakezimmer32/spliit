@@ -29,9 +29,33 @@ const nextConfig = {
   // stage copies that instead of a full production `node_modules`.
   output: 'standalone',
   images: {
-    remotePatterns
+    remotePatterns,
+    // Cloudflare Workers builds (R2 storage) serve images as-is: there is no
+    // Next.js image optimizer on Workers without a paid Images binding.
+    unoptimized: process.env.NEXT_PUBLIC_UPLOAD_STORAGE === 'r2',
   },
   reactCompiler: true,
+  // Tooling that is never loaded at runtime but gets traced into the server
+  // output. Excluded so the Cloudflare Workers bundle stays within size limits.
+  outputFileTracingExcludes: {
+    '*': [
+      'node_modules/prisma/**',
+      'node_modules/@prisma/dev/**',
+      'node_modules/@prisma/engines/**',
+      'node_modules/@electric-sql/**',
+      'node_modules/playwright-core/**',
+      'node_modules/@playwright/**',
+      'node_modules/next-intl-swc-plugin-extractor/**',
+      'node_modules/typescript/**',
+      'node_modules/@typescript/**',
+      'node_modules/oxlint/**',
+      'node_modules/@oxlint/**',
+      'node_modules/wrangler/**',
+      'node_modules/@opennextjs/**',
+      'node_modules/esbuild/**',
+      'node_modules/@esbuild/**',
+    ],
+  },
   // Required to run in a codespace (see https://github.com/vercel/next.js/issues/58019)
   experimental: {
     serverActions: {
