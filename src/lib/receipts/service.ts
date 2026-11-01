@@ -680,7 +680,12 @@ export async function scanReceipt(
         printedTotal: mapped.printedTotal,
         ocrRaw: extracted,
         ocrModel: env.OPENAI_MODEL_RECEIPT_ITEMS,
-        title: mapped.title,
+        // Keep a title the user typed in the wizard; only the default
+        // "Receipt" placeholder is replaced by the store name.
+        title:
+          state.receipt.title.trim().toLowerCase() === 'receipt'
+            ? mapped.title
+            : undefined,
         receiptDate: mapped.receiptDate
           ? toReceiptDate(mapped.receiptDate)
           : undefined,

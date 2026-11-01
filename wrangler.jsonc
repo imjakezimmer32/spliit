@@ -7,6 +7,9 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // esbuild keep_names injects __name() into server code; Next serializes
+  // some of it into inline browser scripts, where __name is undefined.
+  "keep_names": false,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

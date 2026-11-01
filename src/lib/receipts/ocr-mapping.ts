@@ -107,7 +107,7 @@ export function mapExtractedReceipt(
     }
   }
 
-  const merchant = extracted.merchant?.trim() ?? ''
+  const merchant = toDisplayCase(extracted.merchant?.trim() ?? '')
   const date = extracted.date?.trim() ?? ''
 
   return {
@@ -120,4 +120,19 @@ export function mapExtractedReceipt(
     title: merchant.length >= 2 ? merchant.slice(0, MAX_TITLE) : undefined,
     receiptDate: /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : undefined,
   }
+}
+
+/**
+ * Receipts print store names in capitals ("GREEN VALLEY MARKET"); as a title
+ * that reads like shouting. All-caps names become Title Case; anything with
+ * lowercase letters (a deliberate brand spelling) is kept as printed.
+ */
+export function toDisplayCase(name: string): string {
+  if (!/[A-Z]/.test(name) || /[a-z]/.test(name)) return name
+  return name
+    .toLowerCase()
+    .replace(
+      /(^|[\s\-/&(])(\p{L})/gu,
+      (_, sep: string, ch: string) => sep + ch.toUpperCase(),
+    )
 }

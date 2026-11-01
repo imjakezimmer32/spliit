@@ -383,7 +383,7 @@ export function ReviewItems({
               render={({ field: kind }) => (
                 <Select value={kind.value} onValueChange={kind.onChange}>
                   <SelectTrigger
-                    className="w-32"
+                    className="w-28 sm:w-32"
                     aria-label={t('Review.adjustments')}
                   >
                     <SelectValue />
@@ -400,7 +400,7 @@ export function ReviewItems({
             />
             <Input
               aria-label={t('New.titleLabel')}
-              className="min-w-[6rem] flex-1"
+              className="min-w-[5rem] flex-1"
               {...form.register(`adjustments.${index}.label`, {
                 validate: (v) => v.trim().length > 0,
               })}
@@ -408,7 +408,7 @@ export function ReviewItems({
             <Input
               aria-label={t('Review.amount')}
               inputMode="decimal"
-              className="w-24"
+              className="w-20 sm:w-24"
               {...form.register(`adjustments.${index}.amount`, {
                 validate: (v) => isMoney(v) && Number(v) > 0,
               })}
@@ -491,9 +491,14 @@ export function ReviewItems({
         </p>
       )}
 
-      <div className="sticky bottom-0 -mx-4 flex flex-col gap-2 border-t bg-background/95 p-4 backdrop-blur sm:mx-0 sm:flex-row sm:justify-end sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+      <div className="sticky bottom-0 -mx-4 flex flex-wrap gap-2 border-t bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:mx-0 sm:flex-nowrap sm:justify-end sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
         {onCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel}>
+          <Button
+            type="button"
+            variant="ghost"
+            className="flex-1 sm:flex-none"
+            onClick={onCancel}
+          >
             {t('Review.doneEditing')}
           </Button>
         )}
@@ -501,6 +506,7 @@ export function ReviewItems({
           <Button
             type="button"
             variant="outline"
+            className="flex-1 sm:flex-none"
             disabled={isBusy}
             onClick={rescan}
           >
@@ -515,6 +521,7 @@ export function ReviewItems({
         <Button
           type="button"
           variant={receipt.status === 'DRAFT' ? 'outline' : 'default'}
+          className="flex-1 sm:flex-none"
           disabled={isBusy}
           onClick={form.handleSubmit((v) => onValid(v, false))}
         >
@@ -523,6 +530,7 @@ export function ReviewItems({
         {receipt.status === 'DRAFT' && (
           <Button
             type="button"
+            className="order-first w-full sm:order-none sm:w-auto"
             disabled={isBusy}
             onClick={form.handleSubmit((v) => onValid(v, true))}
           >

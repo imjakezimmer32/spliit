@@ -207,8 +207,9 @@ function NewReceiptSteps({
 
         {enableReceiptExtract && (
           <FileInput
+            // No `capture`: phones then offer both the camera and the photo
+            // library, so an already-taken receipt photo can be used.
             accept="image/jpeg,image/png"
-            capture="environment"
             onChange={handlePhoto}
           />
         )}

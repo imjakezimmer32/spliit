@@ -1,11 +1,12 @@
 {
   "Homepage": {
-    "title": "Share <strong>Expenses</strong> with <strong>Friends & Family</strong>",
-    "metaTitle": "Spliit · Share Expenses with Friends & Family",
-    "description": "Welcome to your new <strong>Spliit</strong> instance !",
+    "title": "Split <strong>rent</strong>, bills & <strong>receipts</strong> with your <strong>housemates</strong>",
+    "metaTitle": "Rent Split · Share rent, bills & receipts with housemates",
+    "description": "Scan a receipt, let everyone claim what’s theirs, and keep house balances fair. <strong>No ads, no accounts.</strong>",
     "button": {
-      "groups": "Go to groups",
-      "github": "GitHub"
+      "groups": "Go to my groups",
+      "github": "GitHub",
+      "create": "Create a house"
     }
   },
   "Header": {
@@ -745,7 +746,7 @@
   },
   "Pwa": {
     "updateTitle": "Update available",
-    "updateDescription": "A new version of Spliit is available.",
+    "updateDescription": "A new version of Rent Split is available.",
     "reload": "Reload"
   }
 }

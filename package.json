@@ -30,7 +30,9 @@
     "perf:bench": "./scripts/perf.sh bench",
     "perf:down": "./scripts/perf.sh down",
     "perf:logs": "./scripts/perf.sh logs",
-    "generate-currency-data": "tsx ./src/scripts/generateCurrencyData.ts"
+    "generate-currency-data": "tsx ./src/scripts/generateCurrencyData.ts",
+    "cf:build": "env -u POSTGRES_PRISMA_URL -u POSTGRES_URL_NON_POOLING ./scripts/cf-build.sh",
+    "cf:deploy": "wrangler deploy"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1110.0",

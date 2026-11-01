@@ -2,10 +2,10 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Spliit',
-    short_name: 'Spliit',
+    name: 'Rent Split',
+    short_name: 'Rent Split',
     description:
-      'A minimalist web application to share expenses with friends and family. No ads, no account, no problem.',
+      'Split rent, bills and receipts with your housemates. No ads, no accounts.',
     start_url: '/groups',
     id: '/groups',
     display: 'standalone',

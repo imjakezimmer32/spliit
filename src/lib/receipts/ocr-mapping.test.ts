@@ -1,6 +1,6 @@
 import { getCurrency } from '@/lib/currency'
 import type { ExtractedReceipt } from './ocr'
-import { mapExtractedReceipt } from './ocr-mapping'
+import { mapExtractedReceipt, toDisplayCase } from './ocr-mapping'
 import { MAX_RECEIPT_AMOUNT } from './schemas'
 
 const EUR = getCurrency('EUR')
@@ -149,5 +149,14 @@ describe('mapExtractedReceipt', () => {
     expect(
       mapExtractedReceipt(receipt({ date: '01/03/2026' }), EUR).receiptDate,
     ).toBe(undefined)
+  })
+})
+
+describe('toDisplayCase', () => {
+  it('title-cases all-caps store names and keeps mixed case', () => {
+    expect(toDisplayCase('GREEN VALLEY MARKET')).toBe('Green Valley Market')
+    expect(toDisplayCase("TRADER JOE'S")).toBe("Trader Joe's")
+    expect(toDisplayCase("McDonald's")).toBe("McDonald's")
+    expect(toDisplayCase('7-ELEVEN')).toBe('7-Eleven')
   })
 })

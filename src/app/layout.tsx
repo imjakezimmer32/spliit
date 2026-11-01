@@ -10,10 +10,10 @@ import { Analytics } from '@/lib/analytics/analytics'
 import { getAnalyticsConfig } from '@/lib/analytics/config'
 import { effectiveBaseUrl } from '@/lib/env'
 import { TRPCProvider } from '@/trpc/client'
+import { House } from 'lucide-react'
 import type { Metadata, Viewport } from 'next'
 import { NextIntlClientProvider, useTranslations } from 'next-intl'
 import { getLocale, getMessages, getTranslations } from 'next-intl/server'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import './globals.css'
@@ -24,14 +24,14 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(effectiveBaseUrl),
     title: {
       default: t('metaTitle'),
-      template: '%s · Spliit',
+      template: '%s · Rent Split',
     },
     description:
-      'Spliit is a minimalist web application to share expenses with friends and family. No ads, no account, no problem.',
+      'Split rent, bills and receipts with your housemates. Scan a receipt, everyone claims what’s theirs. No ads, no accounts.',
     openGraph: {
       title: t('metaTitle'),
       description:
-        'Spliit is a minimalist web application to share expenses with friends and family. No ads, no account, no problem.',
+        'Split rent, bills and receipts with your housemates. Scan a receipt, everyone claims what’s theirs. No ads, no accounts.',
       images: `/banner.png`,
       type: 'website',
       url: '/',
@@ -43,13 +43,13 @@ export async function generateMetadata(): Promise<Metadata> {
       images: `/banner.png`,
       title: t('metaTitle'),
       description:
-        'Spliit is a minimalist web application to share expenses with friends and family. No ads, no account, no problem.',
+        'Split rent, bills and receipts with your housemates. Scan a receipt, everyone claims what’s theirs. No ads, no accounts.',
     },
     appleWebApp: {
       capable: true,
-      title: 'Spliit',
+      title: 'Rent Split',
     },
-    applicationName: 'Spliit',
+    applicationName: 'Rent Split',
     icons: [
       {
         url: '/android-chrome-192x192.png',
@@ -69,6 +69,19 @@ export const viewport: Viewport = {
   themeColor: '#047857',
 }
 
+function BrandLogo() {
+  return (
+    <span className="m-1 flex items-center gap-2">
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+        <House className="h-5 w-5" aria-hidden />
+      </span>
+      <span className="text-lg font-bold tracking-tight text-primary">
+        Rent Split
+      </span>
+    </span>
+  )
+}
+
 function Content({ children }: { children: React.ReactNode }) {
   const t = useTranslations()
   return (
@@ -79,13 +92,7 @@ function Content({ children }: { children: React.ReactNode }) {
           href="/"
         >
           <h1>
-            <Image
-              src="/logo-with-text.png"
-              className="m-1 h-auto w-auto"
-              width={(35 * 522) / 180}
-              height={35}
-              alt="Spliit"
-            />
+            <BrandLogo />
           </h1>
         </Link>
         <div role="navigation" aria-label="Menu" className="flex">
@@ -115,18 +122,22 @@ function Content({ children }: { children: React.ReactNode }) {
       <footer className="sm:p-8 md:p-16 sm:mt-16 sm:text-sm md:text-base md:mt-32 bg-slate-50 dark:bg-card border-t p-6 mt-8 flex flex-col sm:flex-row sm:justify-between gap-4 text-xs [&_a]:underline">
         <div className="flex flex-col space-y-2">
           <div className="sm:text-lg font-semibold text-base flex space-x-2 items-center">
-            <Link className="flex items-center gap-2" href="/">
-              <Image
-                src="/logo-with-text.png"
-                className="m-1 h-auto w-auto"
-                width={(35 * 522) / 180}
-                height={35}
-                alt="Spliit"
-              />
+            <Link className="flex items-center gap-2 !no-underline" href="/">
+              <BrandLogo />
             </Link>
           </div>
           <div className="flex flex-col space-y a--no-underline-text-white">
-            <span>{t('Footer.madeIn')}</span>
+            <span>
+              Rent Split is a fork of{' '}
+              <a
+                href="https://github.com/spliit-app/spliit"
+                target="_blank"
+                rel="noopener"
+              >
+                Spliit
+              </a>
+              , open source under the MIT License.
+            </span>
             <span>
               {t.rich('Footer.builtBy', {
                 author: (txt) => (
